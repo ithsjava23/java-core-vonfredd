@@ -8,15 +8,15 @@ import java.util.UUID;
 public record ProductRecord(UUID randomUUID, String productName, Category category, BigDecimal price) {
 
     public ProductRecord{
+        if (productName == null)
+            throw new IllegalArgumentException("Product name can't be null or empty.");
         if (productName.equals(""))
             throw new IllegalArgumentException("Product name can't be null or empty.");
-        else if (productName == null)
-            throw new IllegalArgumentException("Product name can't be null or empty.");
-        else if (category == null)
+        if (category == null)
             throw new IllegalArgumentException("Category can't be null.");
-        else if(randomUUID == null)
+        if(randomUUID == null)
             randomUUID = UUID.randomUUID();
-        else if (price == null)
+        if (price == null)
             price = BigDecimal.valueOf(0);
 
     }
@@ -25,6 +25,6 @@ public record ProductRecord(UUID randomUUID, String productName, Category catego
     }
 
     public UUID uuid() {
-        return randomUUID;
+        return this.randomUUID;
     }
 }

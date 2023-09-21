@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Warehouse {
     private static Map<String, Warehouse> instances = new HashMap<>();
-    private List<ProductRecord> addedProducts = new ArrayList<>();
+    private static List<ProductRecord> addedProducts = new ArrayList<>();
     private List<ProductRecord> changedProducts = new ArrayList<>();
     private final String name;
     private Warehouse(String name) {
@@ -15,6 +15,7 @@ public class Warehouse {
     }
 
     public static Warehouse getInstance(String myStore) {
+        addedProducts.clear();
         return instances.computeIfAbsent(myStore, Warehouse::new);
     }
 
@@ -49,15 +50,15 @@ public class Warehouse {
     }
 
     public List<ProductRecord> getProducts() {
-        return Collections.unmodifiableList(this.addedProducts);
+        return List.copyOf(addedProducts);
     }
 
     public ProductRecord addProduct(UUID randomUUID, String milk, Category dairy, BigDecimal valueOf) {
-        for (ProductRecord p : addedProducts)
-            if(p.uuid().equals(randomUUID))
+        for(ProductRecord p : addedProducts)
+            if(p.randomUUID().equals(randomUUID))
                 throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
         addedProducts.add(new ProductRecord(randomUUID,milk,dairy,valueOf));
-        return new ProductRecord(randomUUID,milk,dairy,valueOf);
+        return addedProducts.get(addedProducts.size()-1);
     }
 
     public Optional<ProductRecord> getProductById(UUID uuid) {
