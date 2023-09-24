@@ -3,7 +3,7 @@ package org.example.warehouse;
 import org.example.Category;
 
 import java.math.BigDecimal;
-import java.util.UUID;
+import java.util.*;
 
 public record ProductRecord(UUID randomUUID, String productName, Category category, BigDecimal price) {
 
@@ -18,13 +18,25 @@ public record ProductRecord(UUID randomUUID, String productName, Category catego
             randomUUID = UUID.randomUUID();
         if (price == null)
             price = BigDecimal.valueOf(0);
-
     }
     public BigDecimal price() {
         return new BigDecimal(String.valueOf(price));
     }
-
     public UUID uuid() {
         return this.randomUUID;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProductRecord that = (ProductRecord) o;
+        return Objects.equals(randomUUID, that.randomUUID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(randomUUID);
+    }
+
 }

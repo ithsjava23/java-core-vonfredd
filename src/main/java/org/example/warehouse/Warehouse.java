@@ -5,23 +5,30 @@ import org.example.Category;
 import java.math.BigDecimal;
 import java.util.*;
 
+
 public class Warehouse {
+
     private static Map<String, Warehouse> instances = new HashMap<>();
-    private static List<ProductRecord> addedProducts = new ArrayList<>();
+    static List<ProductRecord> addedProducts = new ArrayList<>();
     private List<ProductRecord> changedProducts = new ArrayList<>();
+    static List<UUID> uuidList = new ArrayList<>();
     private final String name;
     private Warehouse(String name) {
         this.name = name;
     }
 
-    public static Warehouse getInstance(String myStore) {
+    public static Warehouse getInstance(String name) {
         addedProducts.clear();
-        return instances.computeIfAbsent(myStore, Warehouse::new);
+        return instances.computeIfAbsent(name, Warehouse::new);
+    }
+    public static Warehouse getInstance() {
+        addedProducts.clear();
+        return instances.computeIfAbsent("", Warehouse::new);
     }
 
     public static Warehouse createWarehouse(String text){
         if (text == null)
-            return getInstance("");
+            return getInstance();
         return getInstance(text);
     }
 
@@ -54,11 +61,12 @@ public class Warehouse {
     }
 
     public ProductRecord addProduct(UUID randomUUID, String milk, Category dairy, BigDecimal valueOf) {
-        for(ProductRecord p : addedProducts)
-            if(p.randomUUID().equals(randomUUID))
-                throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
-        addedProducts.add(new ProductRecord(randomUUID,milk,dairy,valueOf));
-        return addedProducts.get(addedProducts.size()-1);
+        if (uuidList.contains(randomUUID))
+            throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
+        ProductRecord p = new ProductRecord(randomUUID,milk,dairy,valueOf);
+        addedProducts.add(p);
+        uuidList.add(randomUUID);
+        return p;
     }
 
     public Optional<ProductRecord> getProductById(UUID uuid) {
@@ -73,17 +81,17 @@ public class Warehouse {
     }
 
     public ProductRecord updateProductPrice(UUID uuid, BigDecimal valueOf) {
-        boolean found = false;
+        boolean found;
         int index;
         for(ProductRecord p : addedProducts)
             if (p.uuid().equals(uuid)) {
                 index = addedProducts.indexOf(p);
                 changedProducts.add(p);
-                addedProducts.set(index, new ProductRecord(p.uuid(),p.productName(),p.category(),valueOf));
+                addedProducts.set(index, new ProductRecord(p.randomUUID(),p.productName(),p.category(),valueOf));
                 return p;
             }
         found = true;
-        if(found == true)
+        if(found)
             throw new IllegalArgumentException("Product with that id doesn't exist.");
         return null;
     }
