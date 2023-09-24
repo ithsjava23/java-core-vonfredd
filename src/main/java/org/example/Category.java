@@ -16,7 +16,6 @@ public class Category {
         StringBuilder b = new StringBuilder(name.substring(0,1).toUpperCase() + name.substring(1,name.length()));
         this.name = String.valueOf(b);
     }
-
     public static Category of(String test) {
         Category newCategory = new Category(test);
         if(newCategory.getName() == null)

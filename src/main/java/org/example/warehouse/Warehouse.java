@@ -16,7 +16,6 @@ public class Warehouse {
     private Warehouse(String name) {
         this.name = name;
     }
-
     public static Warehouse getInstance(String name) {
         addedProducts.clear();
         return instances.computeIfAbsent(name, Warehouse::new);

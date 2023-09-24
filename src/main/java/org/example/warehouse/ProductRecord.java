@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public record ProductRecord(UUID randomUUID, String productName, Category category, BigDecimal price) {
-
     public ProductRecord{
         if (productName == null)
             throw new IllegalArgumentException("Product name can't be null or empty.");
