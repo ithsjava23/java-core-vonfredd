@@ -4,6 +4,7 @@ import org.example.Category;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Warehouse {
@@ -11,21 +12,23 @@ public class Warehouse {
     private static Map<String, Warehouse> instances = new HashMap<>();
     static List<ProductRecord> addedProducts = new ArrayList<>();
     private List<ProductRecord> changedProducts = new ArrayList<>();
-    static List<UUID> uuidList = new ArrayList<>();
     private final String name;
+
     private Warehouse(String name) {
         this.name = name;
     }
+
     public static Warehouse getInstance(String name) {
         addedProducts.clear();
         return instances.computeIfAbsent(name, Warehouse::new);
     }
+
     public static Warehouse getInstance() {
         addedProducts.clear();
         return instances.computeIfAbsent("", Warehouse::new);
     }
 
-    public static Warehouse createWarehouse(String text){
+    public static Warehouse createWarehouse(String text) {
         if (text == null)
             return getInstance();
         return getInstance(text);
@@ -60,19 +63,17 @@ public class Warehouse {
     }
 
     public ProductRecord addProduct(UUID randomUUID, String milk, Category dairy, BigDecimal valueOf) {
-        if (uuidList.contains(randomUUID))
+        var map = addedProducts.stream().map((e) -> e.randomUUID()).toList();
+        if (map.contains(randomUUID))
             throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
-        ProductRecord p = new ProductRecord(randomUUID,milk,dairy,valueOf);
-        addedProducts.add(p);
-        uuidList.add(randomUUID);
-        return p;
+        ProductRecord product = new ProductRecord(randomUUID, milk, dairy, valueOf);
+        addedProducts.add(product);
+        return product;
     }
 
     public Optional<ProductRecord> getProductById(UUID uuid) {
-        for(ProductRecord p : addedProducts)
-            if (p.randomUUID().equals(uuid))
-                return Optional.of(p);
-        return Optional.empty();
+        var getId = addedProducts.stream().filter((e) -> e.randomUUID().equals(uuid)).toList();
+        return getId.isEmpty() ? Optional.empty() : Optional.of(getId.get(0));
     }
 
     public List<ProductRecord> getChangedProducts() {
@@ -80,35 +81,24 @@ public class Warehouse {
     }
 
     public ProductRecord updateProductPrice(UUID uuid, BigDecimal valueOf) {
-        boolean found;
-        int index;
-        for(ProductRecord p : addedProducts)
-            if (p.uuid().equals(uuid)) {
-                index = addedProducts.indexOf(p);
-                changedProducts.add(p);
-                addedProducts.set(index, new ProductRecord(p.randomUUID(),p.productName(),p.category(),valueOf));
-                return p;
-            }
-        found = true;
-        if(found)
+        var map = addedProducts.stream().map((e) -> e.randomUUID()).toList();
+        if (!map.contains(uuid))
             throw new IllegalArgumentException("Product with that id doesn't exist.");
+        else if (map.contains(uuid)) {
+            var i = addedProducts.stream().filter((e) -> e.randomUUID().equals(uuid)).toList();
+            var obj = addedProducts.get(addedProducts.indexOf(i.get(0)));
+            changedProducts.add(obj);
+            addedProducts.set(addedProducts.indexOf(obj), new ProductRecord(obj.randomUUID(), obj.productName(), obj.category(), valueOf));
+            return obj;
+        }
         return null;
     }
 
-    public Map<Category,List<ProductRecord>> getProductsGroupedByCategories() {
-        List<ProductRecord> tempList = (addedProducts);
-        Map<Category, List<ProductRecord>> productsOfCategories = new HashMap<>();
-        tempList.sort((o1, o2) -> o1.productName().compareTo(o2.productName()));
-        for (ProductRecord p : tempList)
-            productsOfCategories.computeIfAbsent(p.category(), k -> new ArrayList<>()).add(p);
-        return productsOfCategories;
+    public Map<Category, List<ProductRecord>> getProductsGroupedByCategories() {
+        return addedProducts.stream().collect(Collectors.groupingBy(ProductRecord::category));
     }
 
-    public List<ProductRecord> getProductsBy(Category meat) {
-        List<ProductRecord> temp = new ArrayList<>();
-        for (ProductRecord p : addedProducts)
-            if(p.category().equals(meat))
-                temp.add(p);
-        return temp;
+    public List<ProductRecord> getProductsBy(Category category) {
+        return addedProducts.stream().filter((e) -> e.category().equals(category)).toList();
     }
 }

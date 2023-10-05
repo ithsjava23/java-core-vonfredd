@@ -13,7 +13,7 @@ public class Category {
     private Category(String name) {
         if(name == null)
             throw new IllegalArgumentException("Category name can't be null");
-        StringBuilder b = new StringBuilder(name.substring(0,1).toUpperCase() + name.substring(1,name.length()));
+        StringBuilder b = new StringBuilder(name.substring(0,1).toUpperCase() + name.substring(1));
         this.name = String.valueOf(b);
     }
     public static Category of(String test) {
